@@ -26,6 +26,7 @@ public class GMM {
 
         Random random = new Random();
 
+        //Generate example data
         for (int i = 0; i < cluster1Size; i++) {
             firstCluster[i] = random.nextGaussian() * cluster1Variance + firstClusterCenter;
             firstCluster[i] = firstCluster[i] > firstClusterCenter + cluster1NoiseRange ? firstClusterCenter + cluster1NoiseRange : Math.max(firstClusterCenter - cluster1NoiseRange, firstCluster[i]);
