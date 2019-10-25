@@ -1,5 +1,7 @@
+import com.googlecode.charts4j.*;
 import org.w3c.dom.ranges.Range;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -37,7 +39,35 @@ public class KMeans {
             data[i] = data[i] > secondClusterCenter + cluster2NoiseRange ? secondClusterCenter + cluster2NoiseRange : Math.max(secondClusterCenter - cluster2NoiseRange, data[i]);
         }
 
+        double[] results = new double[data.length];
+        Kernel[] kernels = genKernels(data);
+        for(int i = 0; i < data.length; i++) {
+            results[i] = addKernels(kernels,data[i]);
+            System.out.println(results[i]);
+        }
+
+        DylansGrapher grapher = new DylansGrapher(data,results);
+
+        Data datagjgj = DataUtil.scaleWithinRange(0,0.6,data);
+        Data datadkjhkdhs = DataUtil.scaleWithinRange(0,0.6,results);
+
+        final XYLine line = Plots.newXYLine(datagjgj,datadkjhkdhs);
+
+        final XYLineChart chart = GCharts.newXYLineChart(line);
+        chart.setTitle("Growth of Alibata System Inc. (Estimated Plot)");
+        chart.setSize(400, 300);
+        chart.setGrid(0.001,0.001,1,0);
+
+        System.out.println(chart.toURLString());
         System.out.println(Arrays.toString(genKernels(data)));
+    }
+
+    public static List<Double> array2List(double[] array) {
+        List<Double> output = new ArrayList<>();
+        for(double d : array) {
+            output.add(d);
+        }
+        return output;
     }
 
     public static Kernel[] genKernels(double[] data){

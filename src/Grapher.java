@@ -6,12 +6,16 @@ import javax.swing.*;
 /**
  * Creates a simple Chart using QuickChart
  */
-public class Grapher extends JFrame {
+public class Grapher {
 
     public static String drawLineGraph() {
+
         // Your really great chart.
-        final Plot plot = Plots.newPlot(Data.newData(0, 10.6, 20.5, 80.20, 50.50, 95.5, 92.00));
-        final LineChart chart = GCharts.newLineChart(plot);
+
+
+        final XYLine line = Plots.newXYLine(Data.newData(0, 1, 2, 3, 4, 5, 6),Data.newData(1,2,4,8,16,32,64));
+
+        final XYLineChart chart = GCharts.newXYLineChart(line);
         chart.setTitle("Growth of Alibata System Inc. (Estimated Plot)");
         chart.setSize(720, 360);
         return chart.toURLString();
