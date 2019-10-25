@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Random;
 
 public class KMeans {
+    static final double H = 1;
+
 
     public static void main(String[] args) {
         double firstClusterCenter = 1.0;
@@ -24,7 +26,7 @@ public class KMeans {
         double cluster2Variance = 0.2;
 
         double[] data = new double[cluster1Size+cluster2Size];
-        
+
         //Generate example data
         for (int i = 0; i < cluster1Size; i++) {
             data[i] = random.nextGaussian() * cluster1Variance + firstClusterCenter;
@@ -34,25 +36,35 @@ public class KMeans {
             data[i] = random.nextGaussian() * cluster2Variance + secondClusterCenter;
             data[i] = data[i] > secondClusterCenter + cluster2NoiseRange ? secondClusterCenter + cluster2NoiseRange : Math.max(secondClusterCenter - cluster2NoiseRange, data[i]);
         }
-        
-        double startingPoint1Index = data[0];
-        double startPoint2Index = data[data.length-1];
-    }
-    public double[] genExtremePoints(double[] data){
-        double smallest = data[0];
-        double largest = data[0];
-        for(double d: data){
-            if(d < smallest){
-                smallest = d;
-            }
-            else if(d > largest){
-                largest = d;
-            }
-        }
-        return new double[]{smallest, largest};
+
+        System.out.println(Arrays.toString(genKernels(data)));
     }
 
-    public double min(double[] arr) {
+    public static Kernel[] genKernels(double[] data){
+        Kernel[] kernels = new Kernel[data.length];
+        for(int i = 0; i < data.length; i++){
+            kernels[i] = new Kernel(Kernel.Type.Epanechnikov, data[i], H);
+        }
+        return kernels;
+    }
+
+    public static double addKernels(Kernel[] kernels, double value){
+        double sum = 0;
+        for(Kernel k: kernels){
+            sum += k.calcValue(value);
+        }
+        return sum/kernels.length;
+    }
+
+    public static double addKernels(Kernel[] kernels, double valueRange, double increment){
+        double sum = 0;
+        for(Kernel k: kernels){
+            sum += k.calcValue(increment);
+        }
+        return sum/kernels.length;
+    }
+
+    public static double min(double[] arr) {
         double minVal = Double.MAX_VALUE;
         for(double val : arr) {
             minVal = Math.min(val, minVal);
