@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public class KMeans {
+public class KernelMixtureModel {
     static final double H = 1;
 
 
@@ -18,8 +18,8 @@ public class KMeans {
         
         int k = 2;
 
-        int cluster1Size = 10;
-        int cluster2Size = 10;
+        int cluster1Size = 250;
+        int cluster2Size = 250;
 
         double cluster1NoiseRange = 0.5;
         double cluster2NoiseRange = 0.5;
@@ -39,6 +39,7 @@ public class KMeans {
             data[i] = data[i] > secondClusterCenter + cluster2NoiseRange ? secondClusterCenter + cluster2NoiseRange : Math.max(secondClusterCenter - cluster2NoiseRange, data[i]);
         }
 
+
         double[] results = new double[data.length];
         Kernel[] kernels = genKernels(data);
         for(int i = 0; i < data.length; i++) {
@@ -46,19 +47,13 @@ public class KMeans {
             System.out.println(results[i]);
         }
 
-        DylansGrapher grapher = new DylansGrapher(data,results);
+        for(int i = 0; i < data.length; i++) {
+            results[i] = addKernels(kernels,data[i]);
+            System.out.println(results[i]);
+        }
 
-        Data datagjgj = DataUtil.scaleWithinRange(0,0.6,data);
-        Data datadkjhkdhs = DataUtil.scaleWithinRange(0,0.6,results);
+        new DylansGrapher(data,kernels);
 
-        final XYLine line = Plots.newXYLine(datagjgj,datadkjhkdhs);
-
-        final XYLineChart chart = GCharts.newXYLineChart(line);
-        chart.setTitle("Growth of Alibata System Inc. (Estimated Plot)");
-        chart.setSize(400, 300);
-        chart.setGrid(0.001,0.001,1,0);
-
-        System.out.println(chart.toURLString());
         System.out.println(Arrays.toString(genKernels(data)));
     }
 
@@ -83,15 +78,7 @@ public class KMeans {
         for(Kernel k: kernels){
             sum += k.calcValue(value);
         }
-        return sum/kernels.length;
-    }
-
-    public static double addKernels(Kernel[] kernels, double valueRange, double increment){
-        double sum = 0;
-        for(Kernel k: kernels){
-            sum += k.calcValue(increment);
-        }
-        return sum/kernels.length;
+        return Math.max(0,sum/kernels.length);
     }
 
     public static double min(double[] arr) {
@@ -100,5 +87,12 @@ public class KMeans {
             minVal = Math.min(val, minVal);
         }
         return minVal;
+    }
+    public static double max(double[] arr) {
+        double maxVal = Double.MIN_VALUE;
+        for(double val : arr) {
+            maxVal = Math.max(val, maxVal);
+        }
+        return maxVal;
     }
 }
