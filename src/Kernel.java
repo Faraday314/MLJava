@@ -25,6 +25,10 @@ public class Kernel {
         return type.funct.apply(x,datapoint,h);
     }
 
+    public double getU(double x) {
+        return (x-datapoint)/h;
+    }
+
     @Override
     public String toString() {
         return 1/h+"*(3/4)*(1-((x-"+datapoint+")/"+h+")**2";

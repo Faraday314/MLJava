@@ -81,7 +81,7 @@ public class GrapherPannel extends JPanel {
         }
         for(int i = 0; i < pointsAt.length; i++) {
             if (pointsAt[i] != 0) {
-                g.fillOval(i * pixelsPerGroup, frame.getHeight() - circleWidth - 100 - (circleWidth * 2 * pointsAt[i]), circleWidth, circleWidth);
+                g.fillOval(i * pixelsPerGroup, frame.getHeight() - circleWidth - 100 - (circleWidth * pointsAt[i]), circleWidth, circleWidth);
             }
         }
         g.setColor(new Color(0,0,0));
