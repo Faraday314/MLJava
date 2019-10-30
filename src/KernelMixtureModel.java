@@ -50,18 +50,18 @@ public class KernelMixtureModel {
         Kernel[] kernels = genKernels(data);
         for(int i = 0; i < data.length; i++) {
             results[i] = addKernels(kernels,data[i]);
-            System.out.println(results[i]);
         }
 
         for(int i = 0; i < data.length; i++) {
             results[i] = addKernels(kernels,data[i]);
-            System.out.println(results[i]);
         }
 
         Kernel[] kernels1 = new Kernel[1];
         kernels1[0] = kernels[0];
 
-        new DylansGrapher(data,kernels);
+        findMin(kernels,0.5,3.5,0.1,0);
+
+        new DylansGrapher(data,kernels,1.5);
 
     }
 
@@ -105,21 +105,48 @@ public class KernelMixtureModel {
         return maxVal;
     }
 
-    public static double findMin(Kernel[] kernels, double lowerBound, double upperBound, double step) {
-        /*
-        1. find whether function is increasing or decreasing at starting point.
-        2. If increasing, x = x + step
-            2a. If new x value is increasing as well, keep adding steps until it starts decreasing
-            2b. Add more steps until it goes from decreasing to increasing
-
-         */
-
-        double min = Double.MAX_VALUE;
-        double lastMin = 0;
-        double lastValue = addKernels(kernels,lowerBound);
-        double currentValue = Double.MAX_VALUE;
+    public static double findMin(Kernel[] kernels, double lowerBound, double upperBound, double step, double lossThreshold) {
         double currentX = lowerBound;
+        double lastValue = addKernels(kernels,currentX);
+        currentX += step/2;
+        double currentValue = addKernels(kernels,currentX);
+        double lastDelta = currentValue-lastValue;
 
+        while(lastDelta == 0) {
+            currentX += step/2;
+            lastValue = currentValue;
+            currentValue = addKernels(kernels,currentX);
+            lastDelta = currentValue - lastValue;
+        }
+        currentX += step/2;
+        lastValue = currentValue;
+        currentValue = addKernels(kernels,currentX);
+        double delta = currentValue - lastValue;
+        double deltadelta = (delta - lastDelta);
+
+        System.out.println(deltadelta);
+
+        int lastSgn = (int) Math.signum(delta);
+        int sgn = lastSgn;
+
+        while (currentX <= upperBound){
+
+            lastSgn = sgn;
+            currentX += step;
+            lastValue = currentValue;
+
+            currentValue = addKernels(kernels,currentX);
+            delta = currentValue - lastValue;
+            sgn = (int) Math.signum(delta);
+
+            if(sgn - lastSgn > 0) {
+
+                System.out.println("lower X: "+(currentX-step));
+                System.out.println("Upper X: "+currentX);
+                System.out.println("delta: "+delta);
+                System.out.println("sign change: "+(sgn-lastSgn));
+            }
+        }
         return 0;
     }
 }

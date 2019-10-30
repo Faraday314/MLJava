@@ -14,6 +14,8 @@ public class GrapherPannel extends JPanel {
     double kernalMax;
     double kernalMin;
     double min;
+    boolean addLine2 = false;
+    double lineAt;
 
     double[] data;
     Kernel[] results;
@@ -28,13 +30,22 @@ public class GrapherPannel extends JPanel {
         drawGraph();
     }
 
+    GrapherPannel(JFrame frame,double[] data, Kernel[] resaults, double lineAt){
+        this(frame,data,resaults);
+        addLine2 = true;
+        this.lineAt = lineAt;
+    }
+
     @Override
     public void paintComponent(Graphics g){
         g.setColor(new Color(255,255,255));
         g.drawRect(0,0, results.length, HEIGHT);
         drawFunction(g);
         drawPoints(g);
-
+        addLabels();
+        if(addLine2){
+            addLineVertical(g, lineAt);
+        }
     }
 
 
@@ -62,7 +73,6 @@ public class GrapherPannel extends JPanel {
         double[] kernalOuts = new double[frame.getWidth()];
         double step = (max - min)/frame.getWidth();
         for(int i = 0; i < frame.getWidth(); i++) {
-            System.out.println("KOut: " + (min + i * step) + " = " +  KernelMixtureModel.addKernels(results, min + i * step));
             kernalOuts[i] = KernelMixtureModel.addKernels(results, min + i * step);
         }
         kernalMax = KernelMixtureModel.max(kernalOuts);
@@ -93,5 +103,27 @@ public class GrapherPannel extends JPanel {
     }
     private int getScaledValues(Kernel[] d, double point){
         return (int) -Math.round(((KernelMixtureModel.addKernels(d,point) - kernalMin)/(kernalMax - kernalMin)) * (frame.getHeight()));
+    }
+
+    private void addLabels(){
+        JButton jButton = new JButton(min + "");
+        jButton.setFont(new Font("Verdana",1,20));
+        jButton.setSize(100,20);
+        jButton.setBounds(0, 0, 100, 20);
+        JButton jButton2 = new JButton(max + "");
+        jButton2.setFont(new Font("Verdana",1,20));
+        jButton2.setSize(100,20);
+        jButton2.setBounds(frame.getWidth() - 100, 0,100,20);
+        this.add(jButton);
+        this.add(jButton2);
+    }
+
+    private void addLineVertical(Graphics g, double xPos){
+        g.setColor(new Color(150,0,0));
+        g.drawRect(getPointX(xPos), frame.getHeight(), 1,-frame.getHeight());
+    }
+
+    private void addLineHorizontal(Graphics g, double yPos){
+        g.drawRect(0, frame.getHeight(), 1,-frame.getHeight());
     }
 }
