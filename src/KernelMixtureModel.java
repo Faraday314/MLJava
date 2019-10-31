@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Random;
 
 public class KernelMixtureModel {
-    static final double H = 0.25;
+    static final double H = 0.5;
 
 
     public static void main(String[] args) {
-        double firstClusterCenter = 1.0;
+        double firstClusterCenter = 0.0;
         double secondClusterCenter = 2.0;
-        double thirdClusterCenter = 3.0;
+        double thirdClusterCenter = 20.0;
 
         Random random = new Random();
 
@@ -59,9 +59,11 @@ public class KernelMixtureModel {
         Kernel[] kernels1 = new Kernel[1];
         kernels1[0] = kernels[0];
 
-        findMin(kernels,0.5,3.5,0.1,0);
+        List<Double> dividers = findMin(kernels,0,20,0.1,0.01);
 
-        new DylansGrapher(data,kernels,1.5);
+        new DylansGrapher(data,kernels,dividers.get(0));
+        new DylansGrapher(data,kernels,dividers.get(1));
+
 
     }
 
@@ -105,29 +107,28 @@ public class KernelMixtureModel {
         return maxVal;
     }
 
-    public static double findMin(Kernel[] kernels, double lowerBound, double upperBound, double step, double lossThreshold) {
+    public static List<Double> findMin(Kernel[] kernels, double lowerBound, double upperBound, double step, double lossThreshold) {
         double currentX = lowerBound;
         double lastValue = addKernels(kernels,currentX);
         currentX += step/2;
         double currentValue = addKernels(kernels,currentX);
-        double lastDelta = currentValue-lastValue;
+        double delta = currentValue-lastValue;
 
-        while(lastDelta == 0) {
-            currentX += step/2;
+        while(delta == 0) {
+            currentX += step;
             lastValue = currentValue;
             currentValue = addKernels(kernels,currentX);
-            lastDelta = currentValue - lastValue;
+            delta = currentValue - lastValue;
         }
-        currentX += step/2;
+        currentX += step;
         lastValue = currentValue;
         currentValue = addKernels(kernels,currentX);
-        double delta = currentValue - lastValue;
-        double deltadelta = (delta - lastDelta);
-
-        System.out.println(deltadelta);
+        delta = currentValue - lastValue;
 
         int lastSgn = (int) Math.signum(delta);
         int sgn = lastSgn;
+
+        List<MinRange> minRanges = new ArrayList<>();
 
         while (currentX <= upperBound){
 
@@ -140,13 +141,51 @@ public class KernelMixtureModel {
             sgn = (int) Math.signum(delta);
 
             if(sgn - lastSgn > 0) {
-
-                System.out.println("lower X: "+(currentX-step));
-                System.out.println("Upper X: "+currentX);
-                System.out.println("delta: "+delta);
-                System.out.println("sign change: "+(sgn-lastSgn));
+                minRanges.add(new MinRange(currentX-step,currentX));
             }
         }
-        return 0;
+
+        List<Double> dividers = new ArrayList<>();
+        List<Double> flooredDividers = new ArrayList<>();
+
+        boolean lastMidFloored = false;
+
+        for(MinRange range : minRanges) {
+            lastValue = addKernels(kernels,range.lower);
+            double mid = (range.lower + range.upper)/2.0;
+            currentValue = addKernels(kernels,mid);
+            double lBound = range.lower;
+            double uBound = range.upper;
+            while(Math.abs(currentValue-lastValue) > lossThreshold) {
+                double rmid = (mid+uBound)/2.0;
+                double lmid = (lBound+mid)/2.0;
+
+                double rmidVal = addKernels(kernels,rmid);
+                double lmidVal = addKernels(kernels,lmid);
+
+                mid = rmidVal > lmidVal ? lmid : rmid;
+
+                System.out.println(mid);
+
+                lastValue = currentValue;
+                currentValue = addKernels(kernels,mid);
+            }
+            if(Math.abs(currentValue-lastValue) == 0) {
+                flooredDividers.add(mid);
+                lastMidFloored = true;
+            }
+            else if (lastMidFloored) {
+                dividers.add((flooredDividers.get(flooredDividers.size()-1) + mid)/2.0);
+                lastMidFloored = false;
+            }
+            else {
+                dividers.add(mid);
+            }
+        }
+
+        System.out.println(flooredDividers);
+        System.out.println(dividers);
+
+        return dividers;
     }
 }

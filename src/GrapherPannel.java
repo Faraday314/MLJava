@@ -70,6 +70,7 @@ public class GrapherPannel extends JPanel {
 
     private void drawFunction(Graphics g){
         g.setColor(new Color(60,60,60));
+        pointsAt = new int[frame.getWidth() / pixelsPerGroup];
         double[] kernalOuts = new double[frame.getWidth()];
         double step = (max - min)/frame.getWidth();
         for(int i = 0; i < frame.getWidth(); i++) {
